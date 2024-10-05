@@ -27,15 +27,23 @@ public class ContentServer {
             // Read weather data from the file and create WeatherData object
             WeatherData weatherData = readWeatherDataFromFile();
 
-            // Create a PutRequest with the current Lamport time
-            PutRequest putRequest = new PutRequest(weatherData, clock.getTime());
+            // Serialize the weather data to JSON
+            String weatherDataJson = weatherData.toJson();
+            int contentLength = weatherDataJson.length();
 
-            // Send PUT request as JSON
-            out.println(putRequest.toJson());
+            // Construct PUT request headers
+            out.println("PUT /weather.json HTTP/1.1");
+            out.println("User-Agent: ATOMClient/1.0");
+            out.println("Content-Type: application/json");
+            out.println("Content-Length: " + contentLength);
+            out.println();  // Empty line to separate headers and body
+            out.println(weatherDataJson);  // Body: JSON data
 
             // Receive and display server response
-            String response = in.readLine();
-            System.out.println("Server response: " + response);
+            String response;
+            while ((response = in.readLine()) != null) {
+                System.out.println(response);
+            }
 
         } catch (IOException e) {
             System.err.println("Error: Unable to send PUT request.");
@@ -45,7 +53,7 @@ public class ContentServer {
 
     private WeatherData readWeatherDataFromFile() {
         // Dummy implementation for file reading
-        // Replace this with actual file reading logic
+        // TODO: Replace this with actual file reading logic
         return new WeatherData("ID12345", "Sample Location", "State", "PST", -34.9, 138.6, 
                                "15/04:00pm", "20230715160000", 13.3, 9.5, "Cloudy", 
                                5.7, 1023.9, 60, "S", 15, 8);
@@ -54,7 +62,7 @@ public class ContentServer {
     public static void main(String[] args) {
         String serverAddress = args[0]; // e.g., "localhost"
         int serverPort = Integer.parseInt(args[1]); // e.g., 4567
-        String filePath = args[2]; // e.g., "weather.txt"
+        String filePath = args[2]; // e.g., "weather.json"
 
         ContentServer contentServer = new ContentServer(serverAddress, serverPort, filePath);
         contentServer.sendPutRequest();

@@ -58,4 +58,15 @@ public class WeatherData {
     public String getId() {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return "WeatherData [id=" + id + ", name=" + name + ", state=" + state + ", time_zone=" + time_zone + ", lat="
+                + lat + ", lon=" + lon + ", local_date_time=" + local_date_time + ", local_date_time_full="
+                + local_date_time_full + ", air_temp=" + air_temp + ", apparent_t=" + apparent_t + ", cloud=" + cloud
+                + ", dewpt=" + dewpt + ", press=" + press + ", rel_hum=" + rel_hum + ", wind_dir=" + wind_dir
+                + ", wind_speed_kmh=" + wind_speed_kmh + ", wind_spd_kt=" + wind_spd_kt + "]";
+    }
+
+    
 }

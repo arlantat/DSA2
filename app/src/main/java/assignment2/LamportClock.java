@@ -8,6 +8,7 @@ public class LamportClock {
     }
 
     public synchronized int getTime() {
+        System.out.println("Current Lamport time: " + time);
         return time;
     }
 

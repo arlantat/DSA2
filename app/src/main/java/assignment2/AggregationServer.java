@@ -50,17 +50,29 @@ public class AggregationServer {
             try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                  PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
-                // Read the incoming GET request
-                String clientRequest = in.readLine();
-                
-                if (clientRequest.startsWith("{")) {
-                    // Handle PUT request
-                    PutRequest putRequest = PutRequest.fromJson(clientRequest);
-                    handlePutRequest(putRequest, out);
-                } else {
+                // Read the request line
+                String requestLine = in.readLine();
+                if (requestLine.startsWith("PUT")) {
+                    // Parse headers
+                    String headerLine;
+                    int contentLength = 0;
+                    while (!(headerLine = in.readLine()).isEmpty()) {
+                        if (headerLine.startsWith("Content-Length:")) {
+                            contentLength = Integer.parseInt(headerLine.split(":")[1].trim());
+                        }
+                    }
+
+                    // Read the body (weather data in JSON format)
+                    char[] bodyChars = new char[contentLength];
+                    in.read(bodyChars, 0, contentLength);
+                    String body = new String(bodyChars);
+
+                    // Parse the weather data and handle the PUT request
+                    handlePutRequest(body, out);
+
+                } else if (requestLine.startsWith("GET")) {
                     // Handle GET request
-                    GetRequest getRequest = GetRequest.fromJson(clientRequest);
-                    handleGetRequest(getRequest, out);
+                    handleGetRequest(out);
                 }
 
             } catch (IOException e) {
@@ -75,24 +87,29 @@ public class AggregationServer {
         return gson.toJson(weatherDataStore); // Convert weather data map to JSON string
     }
 
-    private synchronized void handlePutRequest(PutRequest putRequest, PrintWriter out) {
-        // Update Lamport clock
-        clock.update(putRequest.getLamportTime());
+    private synchronized void handlePutRequest(String jsonBody, PrintWriter out) {
+        Gson gson = new Gson();
+        WeatherData weatherData = gson.fromJson(jsonBody, WeatherData.class);
+        System.out.println(weatherData.toString());
 
         // Store the weather data in the map using station ID as key
-        WeatherData data = putRequest.getWeatherData();
-        weatherDataStore.put(data.getId(), data);
+        weatherDataStore.put(weatherData.getId(), weatherData);
 
         // Respond with success message
-        out.println("PUT request successful. Data stored for station: " + data.getId());
+        out.println("HTTP/1.1 201 Created");
+        out.println("Content-Type: text/plain");
+        out.println();
+        out.println("PUT request successful. Data stored for station: " + weatherData.getId());
     }
 
-    private synchronized void handleGetRequest(GetRequest getRequest, PrintWriter out) {
-        // Update Lamport clock
-        clock.update(getRequest.getLamportTime());
-
+    private synchronized void handleGetRequest(PrintWriter out) {
         // Convert stored weather data to JSON and send as response
         String jsonResponse = fetchWeatherData();
+
+        // Respond with the JSON data
+        out.println("HTTP/1.1 200 OK");
+        out.println("Content-Type: application/json");
+        out.println();
         out.println(jsonResponse);
     }
 

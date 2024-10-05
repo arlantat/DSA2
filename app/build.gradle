@@ -46,7 +46,7 @@ task runAggregationServer(type: JavaExec) {
 
 task runContentServer(type: JavaExec) {
     main = 'assignment2.ContentServer'
-    args = ['localhost', '4567', 'weather.txt']
+    args = ['localhost', '4567', 'weather.json']
     classpath = sourceSets.main.runtimeClasspath
 }
 

@@ -23,9 +23,10 @@ public class GETClient {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
-            // Prepare GET request
-            GetRequest getRequest = new GetRequest(clock.getTime());
-            out.println(getRequest.toJson()); // Send GET request as JSON
+            // Construct GET request headers
+            out.println("GET /weather.json HTTP/1.1");
+            out.println("User-Agent: GETClient/1.0");
+            out.println();  // Empty line to separate headers and body (no body for GET)
             
             // Receive and display the server's response
             String serverResponse;
@@ -43,7 +44,6 @@ public class GETClient {
     }
 
     private void displayWeatherData(String jsonData) {
-        System.out.println("Weather Data received from server:");
         System.out.println(jsonData);
     }
 
