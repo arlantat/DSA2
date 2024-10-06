@@ -1,0 +1,17 @@
+id: ID08
+name: Station ID08
+state: RandomState
+time_zone: RandomTimeZone
+lat: 75.49575741551988
+lon: -140.52579130540914
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: 8.569970558003725
+apparent_t: 21.94729723697998
+cloud: 28.4733098746479
+dewpt: 8.351388999995848
+press: 965.946519271204
+rel_hum: 69.37316930566007
+wind_dir: 138.7672010226232
+wind_speed_kmh: 5.782660576212639
+wind_spd_kt: 9.732562995647479

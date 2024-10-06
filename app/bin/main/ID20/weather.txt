@@ -1,0 +1,17 @@
+id: ID20
+name: Station ID20
+state: RandomState
+time_zone: RandomTimeZone
+lat: -19.303954781593163
+lon: 169.1585134375402
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: 14.289442725942813
+apparent_t: 9.289416975535588
+cloud: 57.59236190072913
+dewpt: 15.117213639361829
+press: 959.9517753434824
+rel_hum: 0.1906097749090785
+wind_dir: 272.57123663228236
+wind_speed_kmh: 37.59167865798343
+wind_spd_kt: 2.595717532870884

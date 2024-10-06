@@ -1,0 +1,17 @@
+id: ID13
+name: Station ID13
+state: RandomState
+time_zone: RandomTimeZone
+lat: 18.56003772584957
+lon: 31.04611973114794
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: -0.2998395697367471
+apparent_t: 26.655267121492436
+cloud: 21.781967863349962
+dewpt: 27.516357547913113
+press: 966.9549572697252
+rel_hum: 35.234427901730726
+wind_dir: 197.8519898743163
+wind_speed_kmh: 87.81858603542096
+wind_spd_kt: 53.9820779527877

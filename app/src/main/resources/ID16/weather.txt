@@ -1,0 +1,17 @@
+id: ID16
+name: Station ID16
+state: RandomState
+time_zone: RandomTimeZone
+lat: -82.58603936134365
+lon: 170.69749083374523
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: 19.389789030235516
+apparent_t: 7.636502914455988
+cloud: 42.18590529219712
+dewpt: 9.912922300376351
+press: 953.5831629239001
+rel_hum: 22.496183785921275
+wind_dir: 125.48251618205661
+wind_speed_kmh: 50.87473115762586
+wind_spd_kt: 50.746153979656704

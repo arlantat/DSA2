@@ -1,0 +1,17 @@
+id: ID14
+name: Station ID14
+state: RandomState
+time_zone: RandomTimeZone
+lat: -37.054970281091336
+lon: -168.03876791966056
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: 25.368036999692983
+apparent_t: -1.2621021918266262
+cloud: 97.03754541684047
+dewpt: 5.710005248124642
+press: 965.499931308017
+rel_hum: 41.73627365881545
+wind_dir: 93.4995368975311
+wind_speed_kmh: 27.100052855190803
+wind_spd_kt: 38.2180532526705

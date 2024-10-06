@@ -7,23 +7,23 @@ public class WeatherData {
     private String name;
     private String state;
     private String time_zone;
-    private double lat;
-    private double lon;
+    private String lat;
+    private String lon;
     private String local_date_time;
     private String local_date_time_full;
-    private double air_temp;
-    private double apparent_t;
+    private String air_temp;
+    private String apparent_t;
     private String cloud;
-    private double dewpt;
-    private double press;
-    private double rel_hum;
+    private String dewpt;
+    private String press;
+    private String rel_hum;
     private String wind_dir;
-    private int wind_speed_kmh;
-    private int wind_spd_kt;
-    
-    public WeatherData(String id, String name, String state, String time_zone, double lat, double lon,
-            String local_date_time, String local_date_time_full, double air_temp, double apparent_t, String cloud,
-            double dewpt, double press, double rel_hum, String wind_dir, int wind_speed_kmh, int wind_spd_kt) {
+    private String wind_speed_kmh;
+    private String wind_spd_kt;
+
+    public WeatherData(String id, String name, String state, String time_zone, String lat, String lon,
+            String local_date_time, String local_date_time_full, String air_temp, String apparent_t, String cloud,
+            String dewpt, String press, String rel_hum, String wind_dir, String wind_speed_kmh, String wind_spd_kt) {
         this.id = id;
         this.name = name;
         this.state = state;
@@ -67,6 +67,4 @@ public class WeatherData {
                 + ", dewpt=" + dewpt + ", press=" + press + ", rel_hum=" + rel_hum + ", wind_dir=" + wind_dir
                 + ", wind_speed_kmh=" + wind_speed_kmh + ", wind_spd_kt=" + wind_spd_kt + "]";
     }
-
-    
 }
