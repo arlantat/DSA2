@@ -11,6 +11,7 @@ public class GETClient {
     private int serverPort;
     private String stationId;  // implemented so one GETClient = one request = one stationId
     private LamportClock clock;
+    private static final int MAX_RETRIES = 3;
 
     public GETClient(String serverAddress, int serverPort, String stationId) {
         this.serverAddress = serverAddress;
@@ -20,41 +21,49 @@ public class GETClient {
     }
 
     public void sendGetRequest() {
-        try (Socket socket = new Socket(serverAddress, serverPort)) {
-            // Create output stream to send request
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        int attempts = 0;
+        while (attempts < MAX_RETRIES) {
+            try (Socket socket = new Socket(serverAddress, serverPort)) {
+                // Create output stream to send request
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Increment Lamport clock before sending the request
-            clock.increment();
-            int currentTime = clock.getTime();
-            
-            // Construct GET request headers
-            String requestPath = "/weather.json";
-            if (stationId != null && !stationId.isEmpty()) {
-                requestPath += "?stationId=" + stationId;
-            }
-            out.println("GET " + requestPath + " HTTP/1.1");
-            out.println("User-Agent: GETClient/1.0");
-            out.println("Lamport-Time: " + currentTime); // Send Lamport time
-            out.println();  // Empty line to separate headers and body (no body for GET)
-            
-            // Receive and display the server's response
-            String serverResponse;
-            StringBuilder jsonResponse = new StringBuilder();
-            while ((serverResponse = in.readLine()) != null) {
-                jsonResponse.append(serverResponse).append("\n");
-                if (serverResponse.startsWith("Lamport-Time:")) {
-                    int receivedTime = Integer.parseInt(serverResponse.split(":")[1].trim());
-                    clock.update(receivedTime); // Update Lamport clock based on server response
+                // Increment Lamport clock before sending the request
+                clock.increment();
+                int currentTime = clock.getTime();
+                
+                // Construct GET request headers
+                String requestPath = "/weather.json";
+                if (stationId != null && !stationId.isEmpty()) {
+                    requestPath += "?stationId=" + stationId;
+                }
+                out.println("GET " + requestPath + " HTTP/1.1");
+                out.println("User-Agent: GETClient/1.0");
+                out.println("Lamport-Time: " + currentTime); // Send Lamport time
+                out.println();  // Empty line to separate headers and body (no body for GET)
+                
+                // Receive and display the server's response
+                String serverResponse;
+                StringBuilder jsonResponse = new StringBuilder();
+                while ((serverResponse = in.readLine()) != null) {
+                    jsonResponse.append(serverResponse).append("\n");
+                    if (serverResponse.startsWith("Lamport-Time:")) {
+                        int receivedTime = Integer.parseInt(serverResponse.split(":")[1].trim());
+                        clock.update(receivedTime); // Update Lamport clock based on server response
+                    }
+                }
+                
+                // Display the response from the server (JSON formatted weather data)
+                displayWeatherData(jsonResponse.toString());
+                return; // Exit the method if the request was successful
+
+            } catch (IOException e) {
+                attempts++;
+                System.err.println("Error: Unable to connect to server or retrieve data. Attempt " + attempts + " of " + MAX_RETRIES);
+                if (attempts >= MAX_RETRIES) {
+                    e.printStackTrace();
                 }
             }
-            
-            // Display the response from the server (JSON formatted weather data)
-            displayWeatherData(jsonResponse.toString());
-        } catch (IOException e) {
-            System.err.println("Error: Unable to connect to server or retrieve data.");
-            e.printStackTrace();
         }
     }
 

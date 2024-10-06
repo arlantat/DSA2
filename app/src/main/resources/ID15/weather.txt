@@ -1,0 +1,17 @@
+id: ID15
+name: Station ID15
+state: RandomState
+time_zone: RandomTimeZone
+lat: -26.491251441047467
+lon: 8.890314152359622
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: -5.428213792812118
+apparent_t: 18.652361543704824
+cloud: 36.36479538022043
+dewpt: 16.221808760625077
+press: 966.6193812270176
+rel_hum: 89.59004368854724
+wind_dir: 160.6199919851684
+wind_speed_kmh: 90.97432552839308
+wind_spd_kt: 4.132017688562388

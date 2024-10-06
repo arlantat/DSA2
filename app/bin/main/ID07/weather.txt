@@ -1,0 +1,17 @@
+id: ID07
+name: Station ID07
+state: RandomState
+time_zone: RandomTimeZone
+lat: 1.9936588400362183
+lon: -168.36774881042922
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: 26.65454048647962
+apparent_t: 9.063087348635133
+cloud: 93.24965671382441
+dewpt: 9.743829092610365
+press: 969.6591958220836
+rel_hum: 57.263815692881245
+wind_dir: 140.73151950120467
+wind_speed_kmh: 16.44562478258348
+wind_spd_kt: 18.357403323122163

@@ -12,6 +12,7 @@ public class ContentServer {
     private int serverPort;
     private String stationId;
     private LamportClock clock;
+    private static final int MAX_RETRIES = 3;
 
     public ContentServer(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
@@ -21,43 +22,50 @@ public class ContentServer {
     }
 
     public void sendPutRequest() {
-        try (Socket socket = new Socket(serverAddress, serverPort)) {
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        int attempts = 0;
+        while (attempts < MAX_RETRIES) {
+            try (Socket socket = new Socket(serverAddress, serverPort)) {
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Increment Lamport clock before sending the request
-            clock.increment();
-            int currentTime = clock.getTime();
-            
-            // Read weather data from the file and create WeatherData object
-            WeatherData weatherData = readWeatherDataFromFile();
+                // Increment Lamport clock before sending the request
+                clock.increment();
+                int currentTime = clock.getTime();
+                
+                // Read weather data from the file and create WeatherData object
+                WeatherData weatherData = readWeatherDataFromFile();
 
-            // Serialize the weather data to JSON
-            String weatherDataJson = weatherData.toJson();
-            int contentLength = weatherDataJson.length();
+                // Serialize the weather data to JSON
+                String weatherDataJson = WeatherJSONTransformer.toJson(weatherData);
+                int contentLength = weatherDataJson.length();
 
-            // Construct PUT request headers
-            out.println("PUT /weather.json HTTP/1.1");
-            out.println("User-Agent: ATOMClient/1.0");
-            out.println("Content-Type: application/json");
-            out.println("Content-Length: " + contentLength);
-            out.println("Lamport-Time: " + currentTime); // Send Lamport time
-            out.println();  // Empty line to separate headers and body
-            out.println(weatherDataJson);  // Body: JSON data
+                // Construct PUT request headers
+                out.println("PUT /weather.json HTTP/1.1");
+                out.println("User-Agent: ATOMClient/1.0");
+                out.println("Content-Type: application/json");
+                out.println("Content-Length: " + contentLength);
+                out.println("Lamport-Time: " + currentTime); // Send Lamport time
+                out.println();  // Empty line to separate headers and body
+                out.println(weatherDataJson);  // Body: JSON data
 
-            // Receive and display server response
-            String response;
-            while ((response = in.readLine()) != null) {
-                System.out.println(response);
-                if (response.startsWith("Lamport-Time:")) {
-                    int receivedTime = Integer.parseInt(response.split(":")[1].trim());
-                    clock.update(receivedTime); // Update Lamport clock based on server response
+                // Receive and display server response
+                String response;
+                while ((response = in.readLine()) != null) {
+                    System.out.println(response);
+                    if (response.startsWith("Lamport-Time:")) {
+                        int receivedTime = Integer.parseInt(response.split(":")[1].trim());
+                        clock.update(receivedTime); // Update Lamport clock based on server response
+                    }
+                }
+                return; // Exit the method if the request was successful
+
+            } catch (IOException e) {
+                attempts++;
+                System.err.println("Error: Unable to send PUT request. Attempt " + attempts + " of " + MAX_RETRIES);
+                if (attempts >= MAX_RETRIES) {
+                    e.printStackTrace();
                 }
             }
-
-        } catch (IOException e) {
-            System.err.println("Error: Unable to send PUT request.");
-            e.printStackTrace();
         }
     }
     
@@ -175,5 +183,10 @@ public class ContentServer {
 
         ContentServer contentServer = new ContentServer(serverAddress, serverPort);
         contentServer.sendPutRequest();
+    }
+
+    public String getStationId() {
+    
+        return stationId;
     }
 }

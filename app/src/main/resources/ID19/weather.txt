@@ -1,0 +1,17 @@
+id: ID19
+name: Station ID19
+state: RandomState
+time_zone: RandomTimeZone
+lat: -49.21530095379582
+lon: -97.87785432949636
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: 19.7626025458431
+apparent_t: -6.468410260666393
+cloud: 39.21155402170942
+dewpt: 11.080730948186897
+press: 990.707505831191
+rel_hum: 4.853932757232993
+wind_dir: 328.389116399815
+wind_speed_kmh: 86.49805718912306
+wind_spd_kt: 32.34847471272896

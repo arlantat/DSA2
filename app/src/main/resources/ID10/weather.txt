@@ -1,0 +1,17 @@
+id: ID10
+name: Station ID10
+state: RandomState
+time_zone: RandomTimeZone
+lat: -86.66206064301255
+lon: -1.8963876362806218
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: 17.954040269634582
+apparent_t: -5.085096624358538
+cloud: 98.22283472211369
+dewpt: 3.209540039633232
+press: 987.6309437517016
+rel_hum: 50.59402085742508
+wind_dir: 140.5053191997434
+wind_speed_kmh: 81.65102595005897
+wind_spd_kt: 50.73703160383693

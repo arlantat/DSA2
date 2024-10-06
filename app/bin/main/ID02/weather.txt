@@ -1,0 +1,17 @@
+id: ID02
+name: Station ID02
+state: RandomState
+time_zone: RandomTimeZone
+lat: 39.74159239200716
+lon: 30.86291003299587
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: 10.609802952688007
+apparent_t: -6.514104168702968
+cloud: 56.257259394146516
+dewpt: 28.91560262427323
+press: 987.0659350261637
+rel_hum: 74.09982033337408
+wind_dir: 340.23386548472405
+wind_speed_kmh: 36.24994511043844
+wind_spd_kt: 53.390936670089836

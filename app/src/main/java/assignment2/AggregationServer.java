@@ -7,12 +7,13 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 public class AggregationServer {
     private int port;
@@ -20,10 +21,16 @@ public class AggregationServer {
     private Map<String, Long> lastCommunicationTime; // Key: Weather station ID, Value: Last communication time in milliseconds
     private LamportClock clock;
     private static final long EXPIRATION_TIME = 30000; // 30 seconds
+    private static final int CACHE_SIZE = 20; // LRU Cache size
     
     public AggregationServer(int port) {
         this.port = port;
-        this.weatherDataStore = new ConcurrentHashMap<>();
+        this.weatherDataStore = new LinkedHashMap<String, WeatherData>(CACHE_SIZE, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, WeatherData> eldest) {
+                return size() > CACHE_SIZE;
+            }
+        };
         this.lastCommunicationTime = new ConcurrentHashMap<>();
         this.clock = new LamportClock();
     }
@@ -62,6 +69,12 @@ public class AggregationServer {
 
                 // Read the request line
                 String requestLine = in.readLine();
+                if (requestLine == null || requestLine.isEmpty()) {
+                    out.println("HTTP/1.1 204");
+                    out.println();
+                    return;
+                }
+
                 if (requestLine.startsWith("PUT")) {
                     // Parse headers
                     String headerLine;
@@ -101,6 +114,9 @@ public class AggregationServer {
                     
                     // Handle GET request
                     handleGetRequest(out, requestLine);
+                } else {
+                    out.println("HTTP/1.1 400");
+                    out.println();
                 }
 
             } catch (IOException e) {
@@ -110,14 +126,23 @@ public class AggregationServer {
         }
     }
 
-    private String fetchWeatherData() {
-        Gson gson = new Gson();
-        return gson.toJson(weatherDataStore); // Convert weather data map to JSON string
-    }
+    synchronized void handlePutRequest(String jsonBody, PrintWriter out) {
+        if (jsonBody == null || jsonBody.isEmpty()) {
+            out.println("HTTP/1.1 204");
+            out.println();
+            return;
+        }
 
-    private synchronized void handlePutRequest(String jsonBody, PrintWriter out) {
-        Gson gson = new Gson();
-        WeatherData weatherData = gson.fromJson(jsonBody, WeatherData.class);
+        WeatherData weatherData;
+        try {
+            weatherData = WeatherJSONTransformer.fromJson(jsonBody);
+        } catch (JsonSyntaxException e) {
+            out.println("HTTP/1.1 500");
+            out.println();
+            return;
+        }
+
+        boolean isNewEntry = !weatherDataStore.containsKey(weatherData.getId());
 
         // Store the weather data in the map using station ID as key
         weatherDataStore.put(weatherData.getId(), weatherData);
@@ -130,15 +155,18 @@ public class AggregationServer {
         int currentTime = clock.getTime();
 
         // Respond with success message
-        out.println("HTTP/1.1 201 Created");
+        if (isNewEntry) {
+            out.println("HTTP/1.1 201 Created");
+        } else {
+            out.println("HTTP/1.1 200 OK");
+        }
         out.println("Content-Type: text/plain");
         out.println("Lamport-Time: " + currentTime); // Send Lamport time
         out.println();
     }
 
-    private synchronized void handleGetRequest(PrintWriter out, String requestLine) throws IOException {
-        String stationId = null;
-        System.out.println("GET request: " + requestLine);
+    synchronized void handleGetRequest(PrintWriter out, String requestLine) throws IOException {
+        String queriedStationId = null;
     
         // Parse the request line to extract the stationId if present
         if (requestLine.contains("?stationId=")) {
@@ -146,20 +174,31 @@ public class AggregationServer {
             if (parts.length > 1) {
                 String[] queryParams = parts[1].split("=");
                 if (queryParams.length > 1 && "stationId".equals(queryParams[0])) {
-                    stationId = queryParams[1];
+                    queriedStationId = queryParams[1];
                 }
             }
         }
     
         // Fetch the weather data based on the stationId
         String jsonResponse;
-        if (stationId != null && weatherDataStore.containsKey(stationId)) {
-            Gson gson = new Gson();
-            jsonResponse = gson.toJson(weatherDataStore.get(stationId));
+        if (queriedStationId != null && weatherDataStore.containsKey(queriedStationId)) {
+            jsonResponse = WeatherJSONTransformer.toJson(weatherDataStore.get(queriedStationId));
             // Update the last communication time for the station ID
-            lastCommunicationTime.put(stationId, System.currentTimeMillis());
+            lastCommunicationTime.put(queriedStationId, System.currentTimeMillis());
         } else {
-            jsonResponse = fetchWeatherData(); // Fetch all weather data if stationId is not provided or not found
+            WeatherData mostRecentData = null;
+            for (WeatherData data : weatherDataStore.values()) {
+                if (mostRecentData == null || lastCommunicationTime.get(data.getId()) > lastCommunicationTime.get(mostRecentData.getId())) {
+                    mostRecentData = data;
+                }
+            }
+            if (mostRecentData == null) {
+                jsonResponse = "{}"; // No data available
+            } else {
+                jsonResponse = WeatherJSONTransformer.toJson(mostRecentData);
+                // Update the last communication time for the station ID
+                lastCommunicationTime.put(mostRecentData.getId(), System.currentTimeMillis());
+            }
         }
 
         // Increment Lamport clock before sending the response
@@ -176,6 +215,7 @@ public class AggregationServer {
 
     private void removeExpiredData() {
         // Removes weather data from content servers that haven't communicated for over 30 seconds.
+        System.out.println("Checking for expired data...");
         long currentTime = System.currentTimeMillis();
         for (Map.Entry<String, Long> entry : lastCommunicationTime.entrySet()) {
             if (currentTime - entry.getValue() > EXPIRATION_TIME) {
@@ -195,5 +235,9 @@ public class AggregationServer {
         // Entry point to start the server with a default or provided port.
         int port = args.length > 0 ? Integer.parseInt(args[0]) : 4567;
         new AggregationServer(port).start();
+    }
+
+    public Map<String, WeatherData> getWeatherDataStore() {
+        return weatherDataStore;
     }
 }

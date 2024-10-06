@@ -1,0 +1,17 @@
+id: ID17
+name: Station ID17
+state: RandomState
+time_zone: RandomTimeZone
+lat: 45.29131604810152
+lon: -32.339566868599775
+local_date_time: 2023-10-01T12:00:00
+local_date_time_full: 2023-10-01T12:00:00Z
+air_temp: 26.149126395777046
+apparent_t: -1.8768911696791903
+cloud: 59.709205370263
+dewpt: 6.000605219048759
+press: 998.5381713722134
+rel_hum: 86.12196599008645
+wind_dir: 33.310200982533814
+wind_speed_kmh: 82.84628683438018
+wind_spd_kt: 40.563850306303245
